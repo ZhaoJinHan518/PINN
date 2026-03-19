@@ -24,6 +24,7 @@ def sech(x: np.ndarray) -> np.ndarray:
 
 class PINN(nn.Module):
     def __init__(self, layers, lb, ub):
+        """Initialize the PINN network and normalization bounds."""
         super().__init__()
         self.register_buffer("lb", torch.tensor(lb, dtype=torch.float32))
         self.register_buffer("ub", torch.tensor(ub, dtype=torch.float32))
@@ -80,10 +81,12 @@ def schrodinger_residual(model, t, x):
 
 
 def parse_layers(layers_str: str):
+    """Parse a comma-separated list of integers into layer dimensions."""
     return [int(item) for item in layers_str.split(",") if item.strip()]
 
 
 def build_training_data(n0, nb, nf, bounds, seed):
+    """Generate training data for initial, boundary, and residual points."""
     rng = np.random.default_rng(seed)
     x_min, x_max, t_min, t_max = bounds
     x0 = x_min + (x_max - x_min) * latin_hypercube(n0, 1, rng)
@@ -118,6 +121,7 @@ def to_tensor(array, device):
 
 
 def train(model, data, config, device):
+    """Train the PINN with optional Adam warmup and L-BFGS optimization."""
     t0 = to_tensor(data["t0"], device)
     x0 = to_tensor(data["x0"], device)
     u0 = to_tensor(data["u0"], device)
@@ -190,6 +194,7 @@ def train(model, data, config, device):
 
 
 def evaluate(model, bounds, device, n_t, n_x, save_path):
+    """Evaluate the trained model on a grid and optionally save predictions."""
     x_min, x_max, t_min, t_max = bounds
     t = np.linspace(t_min, t_max, n_t)
     x = np.linspace(x_min, x_max, n_x)
