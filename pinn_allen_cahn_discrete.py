@@ -156,11 +156,11 @@ def train(model, data, rk_coeffs, config, device):
         u_next = outputs[:, q : q + 1]
         u_x_stage = derivatives_per_output(u_stage, x_n)
         u_xx_stage = derivatives_per_output(u_x_stage, x_n)
-        rhs_stage = -DIFFUSIVITY * u_xx_stage + 5.0 * u_stage**3 - 5.0 * u_stage
-        u_in = u_stage + dt * (rhs_stage @ a.T)
-        u_next_pred = u_next + dt * (rhs_stage @ b)
-        pred = torch.cat([u_in, u_next_pred], dim=1)
-        mse_n = torch.mean((pred - u_n.expand_as(pred)) ** 2)
+        rhs_stage = DIFFUSIVITY * u_xx_stage - 5.0 * u_stage**3 + 5.0 * u_stage
+        u_in = u_stage - dt * (rhs_stage @ a.T)
+        u_next_pred = u_next - dt * (rhs_stage @ b)
+        collocation = torch.cat([u_in, u_next_pred], dim=1)
+        mse_n = torch.mean((collocation - u_n.expand_as(collocation)) ** 2)
 
         u_left = model(x_left)
         u_right = model(x_right)
