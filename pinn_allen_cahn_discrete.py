@@ -251,7 +251,10 @@ def main():
         "--dt",
         type=float,
         default=0.8,
-        help="Time interval from t-data to t-target (must equal t-target - t-data).",
+        help=(
+            "Time interval for the discrete-time PINN (must equal t-target - t-data; "
+            "distinct from solver-dt)."
+        ),
     )
     parser.add_argument(
         "--n-data",
@@ -342,8 +345,6 @@ def main():
         raise ValueError(
             f"t-target must match t-data + dt (expected {expected_target:.3f})."
         )
-    if t_target <= args.t_data:
-        raise ValueError("t-target must be greater than t-data.")
 
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
