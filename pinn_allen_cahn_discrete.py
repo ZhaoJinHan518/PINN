@@ -227,35 +227,110 @@ def main():
     parser = argparse.ArgumentParser(
         description="Discrete-time PINN for the Allen-Cahn equation (periodic BCs)."
     )
-    parser.add_argument("--seed", type=int, default=1234)
-    parser.add_argument("--device", type=str, default="cpu")
-    parser.add_argument("--q", type=int, default=100)
-    parser.add_argument("--t-data", type=float, default=0.1)
-    parser.add_argument("--t-target", type=float, default=0.9)
+    parser.add_argument("--seed", type=int, default=1234, help="Random seed.")
+    parser.add_argument("--device", type=str, default="cpu", help="Torch device.")
+    parser.add_argument(
+        "--q",
+        type=int,
+        default=100,
+        help="Number of Gauss-Legendre collocation stages.",
+    )
+    parser.add_argument(
+        "--t-data",
+        type=float,
+        default=0.1,
+        help="Time at which training data is sampled.",
+    )
+    parser.add_argument(
+        "--t-target",
+        type=float,
+        default=0.9,
+        help="Time at which the solution is predicted.",
+    )
     parser.add_argument(
         "--dt",
         type=float,
         default=0.8,
         help="Discrete-time step size between t-data and t-target.",
     )
-    parser.add_argument("--n-data", type=int, default=200)
-    parser.add_argument("--x-min", type=float, default=-1.0)
-    parser.add_argument("--x-max", type=float, default=1.0)
+    parser.add_argument(
+        "--n-data",
+        type=int,
+        default=200,
+        help="Number of spatial training samples.",
+    )
+    parser.add_argument(
+        "--x-min",
+        type=float,
+        default=-1.0,
+        help="Left boundary of the spatial domain.",
+    )
+    parser.add_argument(
+        "--x-max",
+        type=float,
+        default=1.0,
+        help="Right boundary of the spatial domain.",
+    )
     parser.add_argument(
         "--solver-dt",
         type=float,
         default=1e-4,
         help="Time step for the spectral reference solver.",
     )
-    parser.add_argument("--solver-nx", type=int, default=512)
-    parser.add_argument("--layers", type=str, default="1,200,200,200,200,101")
-    parser.add_argument("--adam-steps", type=int, default=0)
-    parser.add_argument("--adam-lr", type=float, default=1e-3)
-    parser.add_argument("--lbfgs-max-iter", type=int, default=500)
-    parser.add_argument("--lbfgs-tol-grad", type=float, default=1e-7)
-    parser.add_argument("--lbfgs-tol-change", type=float, default=1e-9)
-    parser.add_argument("--log-every", type=int, default=50)
-    parser.add_argument("--save-predictions", type=str, default="")
+    parser.add_argument(
+        "--solver-nx",
+        type=int,
+        default=512,
+        help="Number of spatial grid points in the spectral solver.",
+    )
+    parser.add_argument(
+        "--layers",
+        type=str,
+        default="1,200,200,200,200,101",
+        help="Comma-separated layer sizes for the neural network.",
+    )
+    parser.add_argument(
+        "--adam-steps",
+        type=int,
+        default=0,
+        help="Number of Adam steps (0 to skip).",
+    )
+    parser.add_argument(
+        "--adam-lr",
+        type=float,
+        default=1e-3,
+        help="Learning rate for Adam.",
+    )
+    parser.add_argument(
+        "--lbfgs-max-iter",
+        type=int,
+        default=500,
+        help="Maximum iterations for the L-BFGS optimizer.",
+    )
+    parser.add_argument(
+        "--lbfgs-tol-grad",
+        type=float,
+        default=1e-7,
+        help="Gradient tolerance for L-BFGS.",
+    )
+    parser.add_argument(
+        "--lbfgs-tol-change",
+        type=float,
+        default=1e-9,
+        help="Parameter change tolerance for L-BFGS.",
+    )
+    parser.add_argument(
+        "--log-every",
+        type=int,
+        default=50,
+        help="Logging frequency (in optimization steps).",
+    )
+    parser.add_argument(
+        "--save-predictions",
+        type=str,
+        default="",
+        help="Output path for predictions (leave empty to skip).",
+    )
     args = parser.parse_args()
 
     if args.dt <= 0.0:
