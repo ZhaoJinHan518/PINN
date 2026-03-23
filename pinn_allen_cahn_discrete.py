@@ -251,7 +251,7 @@ def main():
         "--dt",
         type=float,
         default=0.8,
-        help="Time interval from t-data to t-target.",
+        help="Time interval from t-data to t-target (must equal t-target - t-data).",
     )
     parser.add_argument(
         "--n-data",
