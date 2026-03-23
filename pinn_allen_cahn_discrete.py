@@ -91,10 +91,10 @@ def solve_allen_cahn(t_data, t_target, dt, nx, x_min, x_max):
     u_data = u.copy() if n_data == 0 else None
     for step in range(1, n_target + 1):
         k1 = allen_cahn_rhs(u, k2)
-        k2_rk4 = allen_cahn_rhs(u + 0.5 * dt * k1, k2)
-        k3 = allen_cahn_rhs(u + 0.5 * dt * k2_rk4, k2)
+        rk4_k2 = allen_cahn_rhs(u + 0.5 * dt * k1, k2)
+        k3 = allen_cahn_rhs(u + 0.5 * dt * rk4_k2, k2)
         k4 = allen_cahn_rhs(u + dt * k3, k2)
-        u = u + (dt / 6.0) * (k1 + 2.0 * k2_rk4 + 2.0 * k3 + k4)
+        u = u + (dt / 6.0) * (k1 + 2.0 * rk4_k2 + 2.0 * k3 + k4)
         if step == n_data:
             u_data = u.copy()
     return x, u_data, u
@@ -158,8 +158,8 @@ def train(model, data, rk_coeffs, config, device):
         u_xx_stage = derivatives_per_output(u_x_stage, x_n)
         n_stage = -DIFFUSIVITY * u_xx_stage + 5.0 * u_stage**3 - 5.0 * u_stage
         u_in = u_stage + dt * (n_stage @ a.T)
-        u_q1 = u_next + dt * (n_stage @ b)
-        pred = torch.cat([u_in, u_q1], dim=1)
+        u_next_pred = u_next + dt * (n_stage @ b)
+        pred = torch.cat([u_in, u_next_pred], dim=1)
         mse_n = torch.mean((pred - u_n.expand_as(pred)) ** 2)
 
         u_left = model(x_left)
@@ -264,11 +264,9 @@ def main():
     t_target = args.t_target
     expected_target = args.t_data + dt
     if not np.isclose(t_target, expected_target):
-        print(
-            "Warning: t-target does not match t-data + dt. "
-            f"Using t-target={expected_target:.3f} instead."
+        raise ValueError(
+            f"t-target must match t-data + dt (expected {expected_target:.3f})."
         )
-        t_target = expected_target
     if t_target <= args.t_data:
         raise ValueError("t-target must be greater than t-data.")
 
