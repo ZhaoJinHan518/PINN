@@ -73,13 +73,18 @@ def kdv_rhs(u, k, lambda1, lambda2):
 
 def solve_kdv(t_data, t_target, dt, nx, x_min, x_max, lambda1, lambda2):
     if t_target <= t_data:
-        raise ValueError("t_target must be larger than t_data.")
+        raise ValueError(
+            f"t_target ({t_target}) must be larger than t_data ({t_data})."
+        )
     length = x_max - x_min
     x = np.linspace(x_min, x_max, nx, endpoint=False)
     k = 2.0 * np.pi * np.fft.fftfreq(nx, d=length / nx)
     n_target = int(round(t_target / dt))
     if n_target < 1:
-        raise ValueError("solver dt is too large for the requested target time.")
+        raise ValueError(
+            f"solver_dt ({dt}) is too large for target time {t_target}; "
+            "must result in at least 1 time step."
+        )
     dt = t_target / n_target
     n_data = int(round(t_data / dt))
     t_data_actual = n_data * dt
@@ -112,7 +117,9 @@ def periodic_interp(x, x_grid, u_grid, x_min, x_max):
 def parse_layers(layers_str, output_dim):
     layers = [int(item) for item in layers_str.split(",") if item.strip()]
     if not layers:
-        raise ValueError("layers must contain at least input and output sizes.")
+        raise ValueError(
+            "layers must contain at least 2 elements (input and output layer sizes)."
+        )
     if layers[0] != 1:
         raise ValueError("input layer size must be 1 for x input.")
     if layers[-1] != output_dim:
@@ -169,9 +176,13 @@ def build_training_data(
 
 def compute_collocation_stages(dt, eps):
     if not (0.0 < dt < 1.0):
-        raise ValueError("dt must be in (0, 1) to use the RK stage formula.")
+        raise ValueError(
+            "dt must be in (0, 1) to apply Eq. (28), since log(dt) must be negative."
+        )
     if not (0.0 < eps < 1.0):
-        raise ValueError("eps must be in (0, 1).")
+        raise ValueError(
+            "rk-eps must be in (0, 1) to apply Eq. (28) for the RK stage count."
+        )
     q = int(math.ceil(0.5 * math.log(eps) / math.log(dt)))
     return max(q, 1)
 
